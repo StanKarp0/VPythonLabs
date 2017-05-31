@@ -15,12 +15,12 @@ def _distance(arr):
     return np.sqrt(np.sum(np.power(arr, 2.), 1))
 
 R_ring = 10.
-r_ball = 0.2
+r_ball = 0.1
 R_ball = 1.
 m_ball = 1.
 M_ball = 10.
 
-n_sph = 30  # Liczba kulek
+n_sph = 20  # Liczba kulek
 r_shape = (n_sph, 3)
 
 thk = 0.05
@@ -40,7 +40,7 @@ z = tr * np.sin(ta1)
 
 # Wartosci poczatkowe
 r = np.array([x, y, z]).T
-v = (np.random.random(r_shape)-0.5) * 0.02
+v = (np.random.random(r_shape)-0.5) * 0.1
 R = np.ones(n_sph) * r_ball
 m = np.ones(n_sph) * m_ball
 
@@ -90,15 +90,15 @@ while 1:
     delta = np.power(b, 2.) - 4 * a * c
 
     # Spelnienie warunkow na odbiecie kulek
-    dtp_c = ((delta > 0) * (a != 0) * (r_dist <= R_sum)) > 0
+    # Wyznaczenie nie powtarzajacych sie par (stad macierz trojkatna dolna - tri) kulek do odbicia od siebie
+    dtp_c = ((delta > 0) * (a != 0) * (r_dist <= R_sum) * np.tri(n_sph, k=-1)) > 0
 
     # Rozwiazanie (-b - sqrt(c))/(2a)
     dt_res = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
     dt_p = np.ones((n_sph, n_sph)) * (-dt)
     dt_p[dtp_c] = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
 
-    # Wyznaczenie nie powtarzajacych sie par (stad macierz trojkatna dolna - tri) kulek do odbicia od siebie
-    dtp_i, dtp_j = np.where((dt_p > -dt) * np.tri(n_sph, k=-1))
+    dtp_i, dtp_j = np.where(dt_p > -dt)
     pairs = np.array([dtp_i, dtp_j]).T
 
     if pairs.shape[0]:

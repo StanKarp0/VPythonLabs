@@ -93,16 +93,15 @@ while 1:
     # Spelnienie warunkow na odbiecie kulek
     dtp_c = ((delta > 0) * (a != 0) * (r_dist <= R_sum) * np.tri(n_sph, k=-1)) > 0
 
-    # Rozwiazanie (-b - sqrt(c))/(2a)
-    dt_res = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
-    dt_p = np.ones((n_sph, n_sph)) * (-dt)
-    dt_p[dtp_c] = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
+    if dtp_c.shape[0]:
+        # Rozwiazanie (-b - sqrt(c))/(2a)
+        dt_p = np.ones((n_sph, n_sph)) * (-dt)
+        dt_p[dtp_c] = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
 
-    # Wyznaczenie nie powtarzajacych sie par (stad macierz trojkatna dolna - tri) kulek do odbicia od siebie
-    dtp_i, dtp_j = np.where(dt_p > -dt)
-    pairs = np.array([dtp_i, dtp_j]).T
+        # Wyznaczenie nie powtarzajacych sie par (stad macierz trojkatna dolna - tri) kulek do odbicia od siebie
+        dtp_i, dtp_j = np.where(dt_p > -dt)
+        pairs = np.array([dtp_i, dtp_j]).T
 
-    if pairs.shape[0]:
         v1, v2 = v[pairs[:, 0]], v[pairs[:, 1]]
         r1, r2 = r[pairs[:, 0]], r[pairs[:, 1]]
         m1, m2 = m[pairs[:, 0]], m[pairs[:, 1]]

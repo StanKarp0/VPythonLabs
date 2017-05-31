@@ -20,7 +20,7 @@ R_ball = 1.
 m_ball = 1.
 M_ball = 10.
 
-n_sph = 20  # Liczba kulek
+n_sph = 50  # Liczba kulek
 r_shape = (n_sph, 3)
 
 thk = 0.05
@@ -93,15 +93,12 @@ while 1:
     # Wyznaczenie nie powtarzajacych sie par (stad macierz trojkatna dolna - tri) kulek do odbicia od siebie
     dtp_c = ((delta > 0) * (a != 0) * (r_dist <= R_sum) * np.tri(n_sph, k=-1)) > 0
 
-    # Rozwiazanie (-b - sqrt(c))/(2a)
-    dt_res = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
-    dt_p = np.ones((n_sph, n_sph)) * (-dt)
-    dt_p[dtp_c] = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
+    if dtp_c.shape[0]:
+        dt_p = np.ones((n_sph, n_sph)) * (-dt)
+        dt_p[dtp_c] = (-b[dtp_c] - np.sqrt(delta[dtp_c])) / (2 * a[dtp_c])
+        dtp_i, dtp_j = np.where(dt_p > -dt)
+        pairs = np.array([dtp_i, dtp_j]).T
 
-    dtp_i, dtp_j = np.where(dt_p > -dt)
-    pairs = np.array([dtp_i, dtp_j]).T
-
-    if pairs.shape[0]:
         v1, v2 = v[pairs[:, 0]], v[pairs[:, 1]]
         r1, r2 = r[pairs[:, 0]], r[pairs[:, 1]]
         m1, m2 = m[pairs[:, 0]], m[pairs[:, 1]]
@@ -112,6 +109,7 @@ while 1:
         p2 = np.sum((v1 - v2) * p1) * p1
         mw1 = np.repeat(m2 / m1pm2, [3]).reshape(v1.shape)
         mw2 = np.repeat(m1 / m1pm2, [3]).reshape(v1.shape)
+
         v[pairs[:, 0]] = v1 - 2 * mw1 * p2
         v[pairs[:, 1]] = v2 + 2 * mw2 * p2
 
